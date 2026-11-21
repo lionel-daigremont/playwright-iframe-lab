@@ -10,6 +10,10 @@ const EXPECTED_PRICE = 1800;
     await expect(page).toHaveURL(/build-your-own-expensive-computer/);
     await expect(productPage.title).toHaveText(PRODUCT);
     expect(await productPage.priceValue()).toBe(EXPECTED_PRICE);
+    //the Processor radio defaults to "Medium [+15.00]" (the displayed 1800 is the base price);
+    //pick the no-surcharge option explicitly so the expected cart price is deterministic
+    await page.getByRole('radio', { name: 'Slow' }).check();
+    expect(await productPage.priceValue()).toBe(EXPECTED_PRICE);
     //add item to cart
     await productPage.addToCart();
     //a banner may appear when add the product to cart

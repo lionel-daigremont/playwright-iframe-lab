@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Checkout (lazy)</title><link rel="stylesheet" href="style.css"></head>
+<body>
+  <h1>Checkout</h1>
+  <div class="summary">Build your own expensive computer: <span id="total">1800.00</span> PEN</div>
+  <button id="pay-by-card">Pay by card</button>
+  <p id="loading" hidden>Loading secure payment form…</p>
+  <div id="widget-slot"></div>
+  <p id="result" role="status"></p>
+  <script src="result.js"></script>
+  <script>
+    // The PSP form is only injected after a click, then a network delay: a classic in real life.
+    document.getElementById('pay-by-card').addEventListener('click', () => {
+      document.getElementById('loading').hidden = false;
+      setTimeout(() => {
+        const f = document.createElement('iframe');
+        f.title = 'Secure card payment';
+        f.src = 'http://localhost:3101/card-widget.html?amount=1800.00';
+        document.getElementById('widget-slot').appendChild(f);
+        document.getElementById('loading').hidden = true;
+      }, 2000);
+    });
+  </script>
+</body></html>

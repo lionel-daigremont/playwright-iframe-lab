@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Payment methods</title><link rel="stylesheet" href="style.css">
+<style>iframe { height: 300px; }</style></head>
+<body>
+  <h1>Choose how to pay</h1>
+  <div class="summary">Total: 1800.00 PEN</div>
+  <h2>Yape</h2>
+  <iframe title="Yape payment" src="http://localhost:3101/yape.html"></iframe>
+  <h2>Card</h2>
+  <iframe title="Secure card payment" src="http://localhost:3101/card-widget.html?amount=1800.00"></iframe>
+  <p id="result" role="status"></p>
+  <script src="result.js"></script>
+</body></html>

@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Checkout</title><link rel="stylesheet" href="style.css"></head>
+<body>
+  <h1>Checkout</h1>
+  <div class="summary">Build your own expensive computer: <span id="total">1800.00</span> PEN</div>
+  <h2>Card payment</h2>
+  <iframe title="Secure card payment" name="card-payment"
+          src="http://localhost:3101/card-widget.html?amount=1800.00"></iframe>
+  <p id="result" role="status"></p>
+  <script src="result.js"></script>
+</body></html>

@@ -3,3 +3,12 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+playwright-report-td/
+# Local secrets
+.env
+td-shots/
+
+# Agent sessions and local tool outputs
+.playwright-mcp/
+Claude outputs/
+.claude/settings.local.json

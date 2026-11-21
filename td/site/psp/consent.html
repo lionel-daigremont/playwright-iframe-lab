@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Consent</title><style>body { font-family: sans-serif; margin: 6px; font-size: 13px; }</style></head>
+<body>
+  <label><input type="checkbox" id="accept"> I accept the privacy policy</label>
+  <button id="start" disabled>Start chat</button>
+<script>
+  const accept = document.getElementById('accept');
+  const start = document.getElementById('start');
+  accept.addEventListener('change', () => (start.disabled = !accept.checked));
+  start.addEventListener('click', () => parent.postMessage('consent-given', '*'));
+</script>
+</body></html>

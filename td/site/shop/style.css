@@ -1,0 +1,5 @@
+body { font-family: sans-serif; margin: 24px; max-width: 760px; }
+iframe { border: 1px solid #ccc; width: 100%; height: 330px; }
+.summary { background: #f4f4f4; padding: 8px 12px; }
+#result { font-weight: bold; min-height: 20px; }
+.approved { color: #1b5e20; } .declined { color: #b00020; }

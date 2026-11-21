@@ -1,0 +1,34 @@
+name: Playwright tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Payment lab (local servers)
+        run: npm run td
+        env:
+          PSP_SECRET_KEY: ${{ secrets.PSP_SECRET_KEY }}
+      - name: Demo Web Shop (public site, Chromium only)
+        run: npx playwright test --project=chromium
+        continue-on-error: true   # depends on an external site we don't control
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-reports
+          path: |
+            playwright-report/
+            playwright-report-td/
+          retention-days: 7

@@ -1,42 +1,56 @@
-# pw-demowebshop
+# Playwright + TypeScript lab: payment iframes
 
-Bac à sable Playwright + TypeScript sur le [Demo Web Shop de Tricentis](https://demowebshop.tricentis.com), le site du reto Choucair.
+A hands-on Playwright + TypeScript project built to practice what really matters in e-commerce and fintech UI testing: **cross-origin payment iframes, wait strategies, network mocking, secrets handling and bug hunting**.
 
-## Installation (une seule fois)
-Prérequis : Node.js 20 ou plus récent (`node -v`).
+It contains two parts:
+1. **`tests/`**: UI tests on the public [Tricentis Demo Web Shop](https://demowebshop.tricentis.com) (search, product page, cart), with Page Objects, fixtures and 6 browser projects.
+2. **`td/` + `tests-td/`**: a self-contained **payment lab**. A local shop (port 3100) embeds the card form of a fake Payment Service Provider (port 3101) in a **cross-origin iframe**, like Stripe or Adyen. Nothing external is needed: Playwright starts both servers itself.
+
+## What this project shows
+
+| Topic | Where |
+|---|---|
+| Page Objects and fixtures | `pages/`, `tests/fixtures.ts` |
+| A component Page Object built on a **frame**, not a page | `pages/CardWidget.ts` |
+| Iframes: basic, lazy-loaded, several on a page, nested | `tests-td/iframes.spec.ts` (ex1 to ex6) |
+| Wait strategies: auto-wait, web-first assertions, `waitForResponse` | ex3, ex4 |
+| Network mocking (service virtualization) with `page.route` | ex7, ex7b (data-driven) |
+| Secrets in `.env`, never committed; API protected by a key; PCI DSS checks | `tests-td/security.spec.ts`, `.env.example` |
+| Masking sensitive data in screenshots | ex9 |
+| Known bugs tracked with `test.fail`, tags and issue annotations | `BUGS.md` |
+| Cross-browser: Chromium, Firefox, WebKit, Edge, mobile emulation | `playwright.config.ts` |
+| Linting that catches missing `await`s and assertions that never run | `eslint.config.mjs` |
+| CI on every push | `.github/workflows/playwright.yml` |
+
+## Bugs found
+
+Six defects were found while testing the payment lab, including **a double charge** and **price tampering from the browser**. See [`BUGS.md`](BUGS.md).
+
+## Playwright test agents
+
+The project was also used to try Playwright's AI test agents (`npx playwright init-agents --loop=claude`). On a cart test with a deliberate trap (a paid option pre-selected by default), the **healer** agent found the root cause on the live page, fixed the precondition instead of just changing the expected price, and asked whether the test was meant to check the base price or the default configuration, a business decision it left to the engineer.
+
+## Getting started
+
+Requirements: Node.js 20+.
 
 ```bash
 npm install
 npx playwright install chromium firefox webkit
+cp .env.example .env          # then set PSP_SECRET_KEY (any value works locally)
 ```
 
-## Lancer les tests
-| Commande | Effet |
+| Command | What it does |
 |---|---|
-| `npm test` | tous les tests, navigateur invisible |
-| `npm run test:headed` | idem, en voyant le navigateur |
-| `npm run test:ui` | le mode UI de Playwright (pas à pas, très pratique pour apprendre) |
-| `npx playwright test --grep "@smoke"` | seulement les tests tagués `@smoke` |
-| `npm run report` | ouvre le rapport HTML du dernier lancement |
-| `npx playwright test --project=webkit` | un seul navigateur (`chromium`, `firefox`, `webkit`, `edge`, `mobile-chrome`, `mobile-safari`) |
-| `npm run typecheck` | vérifie les types TypeScript sans lancer les tests |
+| `npm test` | Demo Web Shop tests, all browsers |
+| `npm run td` | payment lab tests (starts the local servers) |
+| `npm run td -- --ui` | payment lab in Playwright UI mode |
+| `npm run td:server` | starts the local shop and PSP, to explore them at http://localhost:3100 |
+| `npm run lint` | ESLint with the Playwright plugin |
+| `npm run report` | opens the last HTML report |
 
-## Structure
-```
-playwright.config.ts        configuration (baseURL, navigateur, rapport, traces)
-pages/                      Page Objects
-  HeaderComponent.ts        le bandeau commun : recherche
-  SearchResultsPage.ts      la page de résultats
-  ProductPage.ts            la fiche produit
-tests/
-  fixtures.ts               les fixtures qui fournissent les Page Objects aux tests
-  product-price.spec.ts     les tests : prix de « Build your own expensive computer »
-```
+See [`td/README-TD.md`](td/README-TD.md) for the lab exercises.
 
-## Cross-browser
-La config définit 6 projets : Chromium, Firefox, WebKit et Microsoft Edge en desktop, plus un Pixel 7 et un iPhone 14 émulés. `npm test` les lance tous. Edge utilise le navigateur installé sur la machine (`channel: 'msedge'`), déjà présent sous Windows. WebKit est le moteur de Safari, mais ce n'est pas Safari lui-même : pour une validation sur le vrai Safari, il faut un Mac ou une plateforme comme BrowserStack.
+## Author
 
-## Feuille de route
-1. ✅ Framework de base et 2 tests de prix
-2. ⬜ Ajouter des tests soi-même (catégories, panier, inscription…), dont quelques-uns volontairement cassés
-3. ⬜ Installer les agents Playwright (`npx playwright init-agents --loop=vscode` ou `--loop=claude`) et tester le planner, le generator et le healer
+Lionel Daigremont, Senior QA Engineer: 20 years of test automation (REST APIs, Java, Playwright), ISTQB certified.

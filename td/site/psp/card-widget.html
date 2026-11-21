@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Secure card form</title>
+<style>
+  body { font-family: sans-serif; margin: 12px; }
+  label { display: block; margin-top: 8px; font-size: 14px; }
+  input { width: 220px; padding: 4px; }
+  .error { color: #b00020; font-size: 13px; min-height: 16px; }
+  #processing { color: #555; }
+</style></head>
+<body>
+  <form id="card-form" novalidate>
+    <label for="holder">Cardholder name</label>
+    <input id="holder" autocomplete="off">
+    <label for="number">Card number</label>
+    <input id="number" inputmode="numeric" autocomplete="off">
+    <label for="expiry">Expiry date (MM/YY)</label>
+    <input id="expiry" autocomplete="off">
+    <label for="cvc">CVC</label>
+    <input id="cvc" autocomplete="off">
+    <p class="error" role="alert" id="error"></p>
+    <button type="submit" id="pay">Pay</button>
+    <p id="processing" hidden>Processing payment…</p>
+  </form>
+<script>
+  const amount = new URLSearchParams(location.search).get('amount') || '0.00';
+  document.getElementById('pay').textContent = 'Pay ' + amount + ' PEN';
+  const form = document.getElementById('card-form');
+  const error = document.getElementById('error');
+  const processing = document.getElementById('processing');
+
+  function luhnOk(n) {
+    let sum = 0, alt = false;
+    for (let i = n.length - 1; i >= 0; i--) {
+      let d = +n[i]; if (alt) { d *= 2; if (d > 9) d -= 9; } sum += d; alt = !alt;
+    }
+    return n.length >= 13 && sum % 10 === 0;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    error.textContent = '';
+    const number = document.getElementById('number').value.replace(/\s/g, '');
+    if (!document.getElementById('holder').value.trim()) { error.textContent = 'Cardholder name is required'; return; }
+    if (!/^\d+$/.test(number) || !luhnOk(number)) { error.textContent = 'Card number is invalid'; return; }
+    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(document.getElementById('expiry').value)) { error.textContent = 'Expiry date is invalid'; return; }
+    if (!/^\d{3}$/.test(document.getElementById('cvc').value)) { error.textContent = 'CVC is invalid'; return; }
+
+    document.getElementById('pay').disabled = true;
+    processing.hidden = false;
+    try {
+      const res = await fetch('/api/pay', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardNumber: number, amount })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      parent.postMessage({ type: 'payment-result', ...data }, '*');
+    } catch (err) {
+      error.textContent = 'Payment service unavailable, please try again';
+    } finally {
+      processing.hidden = true;
+      document.getElementById('pay').disabled = false;
+    }
+  });
+</script>
+</body></html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Support chat</title>
+<style>body { font-family: sans-serif; margin: 8px; } iframe { border: 1px solid #ccc; width: 95%; height: 90px; }</style></head>
+<body>
+  <h2>Chat with an agent</h2>
+  <!-- A consent frame nested inside the chat frame -->
+  <iframe title="Privacy consent" src="consent.html"></iframe>
+  <div id="chat" hidden>
+    <label for="msg">Your message</label>
+    <input id="msg">
+    <button id="send">Send</button>
+    <ul id="messages" aria-label="Messages"></ul>
+  </div>
+<script>
+  window.addEventListener('message', (e) => {
+    if (e.data === 'consent-given') document.getElementById('chat').hidden = false;
+  });
+  document.getElementById('send').addEventListener('click', () => {
+    const li = document.createElement('li');
+    li.textContent = 'You: ' + document.getElementById('msg').value;
+    document.getElementById('messages').appendChild(li);
+    setTimeout(() => {
+      const reply = document.createElement('li');
+      reply.textContent = 'Agent: Thanks, a payment specialist will answer you shortly.';
+      document.getElementById('messages').appendChild(reply);
+    }, 1000);
+  });
+</script>
+</body></html>

@@ -1,0 +1,32 @@
+# Manual job: (re)generates the Linux visual baselines in the CI environment,
+# then commits them to the branch. Run it from the "Actions" tab ("Run workflow").
+name: Update visual snapshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to push the new baselines
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Regenerate the visual baselines
+        run: npx playwright test -c playwright.td.config.ts -g "@visual" --update-snapshots
+        env:
+          PSP_SECRET_KEY: ${{ secrets.PSP_SECRET_KEY }}
+      - name: Commit the new baselines
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "tests-td/*-snapshots/*"
+          git diff --cached --quiet && echo "No baseline change" || \
+            (git commit -m "Update visual baselines (Linux)" && git push)

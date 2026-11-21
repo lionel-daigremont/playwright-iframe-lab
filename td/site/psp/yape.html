@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Yape</title><style>body { font-family: sans-serif; margin: 12px; }</style></head>
+<body>
+  <label for="phone">Phone number</label>
+  <input id="phone">
+  <label for="otp">Approval code</label>
+  <input id="otp">
+  <button id="pay">Pay</button>
+  <p role="status" id="status"></p>
+<script>
+  document.getElementById('pay').addEventListener('click', () => {
+    document.getElementById('status').textContent = 'Request sent to your Yape app';
+  });
+</script>
+</body></html>
