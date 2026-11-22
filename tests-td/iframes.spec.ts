@@ -245,12 +245,21 @@ test.describe('TD iframes', () => {
   test(`ex7b: 200 with ${c.name} is never shown as approved`, async ({ page }) => {
     test.fail(!!c.knownBug, `${c.knownBug}: approved shown without a transaction ID`);
     await page.goto('/checkout.html');
-    await page.route('**/api/pay', (route) => route.fulfill({ status: 200, json: c.body }));
+
+    await page.route('**/api/pay', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));   // emulate a slow PSP
+    await route.fulfill({ status: 200, json: c.body }); 
+    });
 
     const cardWidget = new CardWidget(page.frameLocator(SECURED_FRAME));
     await cardWidget.fill(CARDS.approved);
     await cardWidget.pay();
-    await expect(page.getByRole('status')).not.toHaveText(/approved/i);
+
+    const status = page.getByRole('status');
+    // Wait for the page to show a result (web-first: retries until the mocked PSP answers)
+    await expect(status).not.toBeEmpty();
+    // Only now does the negative check mean something
+    await expect(status).not.toHaveText(/approved/i);
   });
 }
 });
